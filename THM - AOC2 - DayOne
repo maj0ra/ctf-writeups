@@ -1,0 +1,100 @@
+Day One Challenges
+Walkthrough
+
+1. What is the name of the cookie used for authentication?
+
+
+• Register for an account on the “Christmas Console” webpage.
+  ◇ For this exercise, I used Firefox. The steps will be mostly the same in any browser, minus the next step.
+• Click on Firefox's “Settings” menu in the upper-right corner of the browser.
+  ◇ Then click “Web Developer”
+  ◇ Then “Storage Inspector”.
+• The only cookie listed for this sitte is named “auth”.
+
+ANSWER - AUTH
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+2. In what format is the value of this cookie encoded?
+
+
+Look at the value of the cookie:
+
+7b22636f6d70616e79223a22546865204265737420466573746976616c20436f6d70616e79222c2022757365726e616d65223a22636f757274227d
+
+At first glance, this looks like hexadecimal format. It's definitely a string comprised of both numbers and letters, and that hint gives us a place to start on determining the format.
+
+How to verify that it *is* hexadecimal format:
+
+• Go to CyberChef (https://gchq.github.io/CyberChef/).
+• Paste the value of the auth cookie into the “Input" pane of the CyberChef webapp.
+• A “magic wand” icon should appear next to the word “Output” in the bottom pane of the CyberChef webapp.
+  ◇ Click the “magic wand" to automatically convert the value to human-redable text.
+• Check the “Recipe” pane in the center of the CyberChef webapp. The automatically selected conversion tool should say “From Hex”.
+
+ANSWER - HEXADECIMAL
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+3. Having decoded the cookie, what format is the data stored in?
+
+
+Here's the decoded auth cookie text:
+
+{"company":"The Best Festival Company", "username":"court"}
+
+The text is enclosed in brackets {}, and each data object inside the brackets has a type and a value separated by commas.
+
+i.e. - company === type, “The Best Festival Company" === value.
+
+This is exactly how a map is declared in JavaScript. Therefore, the answer must be JSON.
+
+ANSWER - JSON
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+4. What is the value of Santa's cookie?
+
+
+
+To get the new hexadecimal value, we need to remove the username “court” and replace it with “santa”.
+
+{"company":"The Best Festival Company", "username":"santa"}
+
+• Change the value in the “Output” pane of the CyberChef webapp.
+• Copy the raw “Output” data to the clipboard.
+• Click the trash can icon in the upper right corner of CyberChef to clear the previous input and recipe.
+• Paste the new map declaration in the “Input" pane of CyberChef.
+• Choose “To Hex” from the far left pane of CyberChef, and drag it into the “Recipe” column.
+  ◇ Choose “None” for the delimiter in the “Recipe”, or there will be a space inserted after each 2 character pair.
+
+Here's the value of Santa's cookie in hex:
+
+7b22636f6d70616e79223a22546865204265737420466573746976616c20436f6d70616e79222c2022757365726e616d65223a2273616e7461227d
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Now that you are the santa user, you can re-activate the assembly line!
+
+
+In order to become the “Santa” user, you must copy/paste the value of Santa's cookie into the original auth cookie's “value” field in your web browser's developer console.
+
+Click on the “Reload” button on your browser to bypass the authetication screen and log in as Santa!
+
+Once you're in, you should see “switch” buttons next to each control. Click each switch to reactivate the assembly line.
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+5. What is the flag you're given when the line is fully active?
+
+
+Once you've clicked each switch to “On” and reactivated the assembly line, the final flag will be shown at the bottom of the "Christmas Console" webpage.
+
+ANSWER - THM{MjY0Yzg5NTJmY2Q1NzM1NjBmZWFhYmQy}
